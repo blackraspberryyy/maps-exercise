@@ -1,3 +1,6 @@
+import React from "react";
+import { Icon } from "rmwc";
+
 type MapPinProps = {
   lat?: number;
   lng?: number;
@@ -8,8 +11,8 @@ export function MapPin(props: MapPinProps) {
   const { text } = props;
   return (
     <div>
-      {/* <Icon icon={locationIcon} className="pin-icon" /> */}
-      <p className="pin-text">{text}</p>
+      <Icon icon="place" />
+      <p>{text}</p>
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
+
 import "./index.css";
+import "rmwc/dist/styles";
 import App from "./App";
 
 ReactDOM.render(
