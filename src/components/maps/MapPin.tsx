@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { IconButton, Menu, MenuSurfaceAnchor, Typography } from "rmwc";
 import styled from "styled-components";
-import { Restaurant } from "../types";
+import { Restaurant } from "../../types";
 
 type MapPinProps = {
   restaurant: Restaurant;
@@ -40,7 +40,6 @@ export function MapPin(props: MapPinProps) {
               <div style={{ flex: 1 }} />
               <IconButton icon="close" onClick={() => setMenu(false)} />
             </MenuHeader>
-            <Typography use="subtitle2">{restaurant.name}</Typography>
             <hr />
             <Typography use="caption" style={{ paddingTop: 16 }}>
               {restaurant.address}
@@ -50,6 +49,7 @@ export function MapPin(props: MapPinProps) {
 
         <IconButton
           icon="place"
+          style={{ color: "#ea4335" }}
           onClick={(e) => {
             e.stopPropagation();
             setMenu(!menu);
