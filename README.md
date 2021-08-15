@@ -9,7 +9,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 </p>
 
 <p align="center">
-  <img src="screenshot-1.jpg" alt="Draw Polygons" width="50%">
+  <img src="screenshot-2.jpg" alt="Draw Polygons" width="50%">
 </p>
 
 ## Available Scripts
