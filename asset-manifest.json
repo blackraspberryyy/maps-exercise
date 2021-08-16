@@ -1,22 +1,22 @@
 {
   "files": {
-    "main.css": "/blackraspberryyy.github.io/maps-exercise/static/css/main.4a4137e4.chunk.css",
-    "main.js": "/blackraspberryyy.github.io/maps-exercise/static/js/main.024624b2.chunk.js",
-    "main.js.map": "/blackraspberryyy.github.io/maps-exercise/static/js/main.024624b2.chunk.js.map",
-    "runtime-main.js": "/blackraspberryyy.github.io/maps-exercise/static/js/runtime-main.4c96238d.js",
-    "runtime-main.js.map": "/blackraspberryyy.github.io/maps-exercise/static/js/runtime-main.4c96238d.js.map",
-    "static/css/2.ec511f9c.chunk.css": "/blackraspberryyy.github.io/maps-exercise/static/css/2.ec511f9c.chunk.css",
-    "static/js/2.9cdbc551.chunk.js": "/blackraspberryyy.github.io/maps-exercise/static/js/2.9cdbc551.chunk.js",
-    "static/js/2.9cdbc551.chunk.js.map": "/blackraspberryyy.github.io/maps-exercise/static/js/2.9cdbc551.chunk.js.map",
-    "index.html": "/blackraspberryyy.github.io/maps-exercise/index.html",
-    "static/css/2.ec511f9c.chunk.css.map": "/blackraspberryyy.github.io/maps-exercise/static/css/2.ec511f9c.chunk.css.map",
-    "static/css/main.4a4137e4.chunk.css.map": "/blackraspberryyy.github.io/maps-exercise/static/css/main.4a4137e4.chunk.css.map",
-    "static/js/2.9cdbc551.chunk.js.LICENSE.txt": "/blackraspberryyy.github.io/maps-exercise/static/js/2.9cdbc551.chunk.js.LICENSE.txt"
+    "main.css": "/maps-exercise/static/css/main.4a4137e4.chunk.css",
+    "main.js": "/maps-exercise/static/js/main.024624b2.chunk.js",
+    "main.js.map": "/maps-exercise/static/js/main.024624b2.chunk.js.map",
+    "runtime-main.js": "/maps-exercise/static/js/runtime-main.d9b7cb5a.js",
+    "runtime-main.js.map": "/maps-exercise/static/js/runtime-main.d9b7cb5a.js.map",
+    "static/css/2.ec511f9c.chunk.css": "/maps-exercise/static/css/2.ec511f9c.chunk.css",
+    "static/js/2.aa3175f4.chunk.js": "/maps-exercise/static/js/2.aa3175f4.chunk.js",
+    "static/js/2.aa3175f4.chunk.js.map": "/maps-exercise/static/js/2.aa3175f4.chunk.js.map",
+    "index.html": "/maps-exercise/index.html",
+    "static/css/2.ec511f9c.chunk.css.map": "/maps-exercise/static/css/2.ec511f9c.chunk.css.map",
+    "static/css/main.4a4137e4.chunk.css.map": "/maps-exercise/static/css/main.4a4137e4.chunk.css.map",
+    "static/js/2.aa3175f4.chunk.js.LICENSE.txt": "/maps-exercise/static/js/2.aa3175f4.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.4c96238d.js",
+    "static/js/runtime-main.d9b7cb5a.js",
     "static/css/2.ec511f9c.chunk.css",
-    "static/js/2.9cdbc551.chunk.js",
+    "static/js/2.aa3175f4.chunk.js",
     "static/css/main.4a4137e4.chunk.css",
     "static/js/main.024624b2.chunk.js"
   ]
