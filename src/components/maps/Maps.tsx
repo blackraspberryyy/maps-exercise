@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import GoogleMapReact from "google-map-react";
 import styled from "styled-components";
-import { List, ListItem } from "rmwc";
+import { usePosition } from "use-position";
+import { Button } from "rmwc";
 import { Restaurant } from "../../types";
 import { MapPin } from ".";
 
@@ -35,6 +36,8 @@ const MapContainer = styled.div`
 const SideNav = styled.div`
   width: 500px;
   background: white;
+  display: flex;
+  flex-direction: column;
 `;
 
 export function Maps(props: MapsProps) {
@@ -44,7 +47,10 @@ export function Maps(props: MapsProps) {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [drawMode, setDrawMode] = useState<boolean>(false);
   const [PlacesService, setPlacesService] = useState<any>();
+  const [DirectionsService, setDirectionsService] = useState<any>();
+  const [DirectionsRenderer, setDirectionsRenderer] = useState<any>();
   const [drawingManager, setDrawingManager] = useState<any>();
+  const { latitude, longitude } = usePosition(true);
 
   const apiIsLoaded = (api: GoogleMapsApiType) => {
     setMapApi(api);
@@ -54,6 +60,12 @@ export function Maps(props: MapsProps) {
 
       // Set PlacesService
       setPlacesService(new maps.places.PlacesService(map));
+
+      // Set DirectionsService
+      setDirectionsService(new maps.DirectionsService());
+
+      // Set DirectionsRenderer
+      setDirectionsRenderer(new maps.DirectionsRenderer());
 
       // set DrawingManger
       setDrawingManager(
@@ -92,6 +104,7 @@ export function Maps(props: MapsProps) {
                   lat: res.geometry.location.lat(),
                   lng: res.geometry.location.lng(),
                 },
+                placeId: res.place_id,
               });
             });
           }
@@ -103,6 +116,25 @@ export function Maps(props: MapsProps) {
 
   const drawPolygon = () => {
     setDrawMode(!drawMode);
+  };
+
+  const showRoute = (restaurant: Restaurant) => {
+    if (mapsApi && mapsApi.maps && mapsApi.map) {
+      DirectionsRenderer.setMap(mapsApi.map);
+      const origin = new mapsApi.maps.LatLng(latitude, longitude);
+      const destination = new mapsApi.maps.LatLng(
+        restaurant.location.lat,
+        restaurant.location.lng
+      );
+      const travelMode = "DRIVING";
+      const request = { origin, destination, travelMode };
+
+      DirectionsService.route(request, function (response: any, status: any) {
+        if (status === "OK") {
+          DirectionsRenderer.setDirections(response);
+        }
+      });
+    }
   };
 
   useEffect(() => {
@@ -123,7 +155,6 @@ export function Maps(props: MapsProps) {
 
           PlacesService.textSearch(
             {
-              query: "Restaurants in Cebu City",
               type: "restaurant",
               bounds,
             },
@@ -142,6 +173,9 @@ export function Maps(props: MapsProps) {
                 });
               }
               setRestaurants(results);
+
+              // Remove Shape overlay
+              overlay.overlay.setMap(null);
             }
           );
         }
@@ -176,17 +210,32 @@ export function Maps(props: MapsProps) {
                 restaurant={restaurant}
                 lat={restaurant.location.lat}
                 lng={restaurant.location.lng}
+                onDirectionClick={showRoute}
               />
             ))}
         </GoogleMapReact>
       </MapContainer>
       <SideNav>
-        <List>
-          <ListItem onClick={showRestaurants}>
-            Show Restaurants in Cebu
-          </ListItem>
-          <ListItem onClick={drawPolygon}>Draw Polygon</ListItem>
-        </List>
+        <Button unelevated style={{ margin: 8 }} onClick={showRestaurants}>
+          Show Restaurants in Cebu
+        </Button>
+        <Button
+          unelevated={!drawMode}
+          style={{ margin: 8 }}
+          onClick={drawPolygon}
+        >
+          {!drawMode ? "Draw Polygon" : "Toggle off Draw Mode"}
+        </Button>
+        <div style={{ flex: 1 }}></div>
+        <Button
+          danger
+          style={{ margin: 8 }}
+          onClick={() => {
+            DirectionsRenderer.setMap(null);
+          }}
+        >
+          Remove any existing Directions Overlay
+        </Button>
       </SideNav>
     </Container>
   );

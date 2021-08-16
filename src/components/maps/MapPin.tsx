@@ -7,7 +7,13 @@ type MapPinProps = {
   restaurant: Restaurant;
   lat: number;
   lng: number;
+  onDirectionClick: (restaurant: Restaurant) => void;
 };
+
+const Container = styled.div`
+  margin-left: -24px;
+  margin-top: -24px;
+`;
 
 const TextContainer = styled.div`
   width: 250px;
@@ -23,11 +29,11 @@ const MenuHeader = styled.div`
 `;
 
 export function MapPin(props: MapPinProps) {
-  const { restaurant } = props;
+  const { restaurant, onDirectionClick } = props;
 
   const [menu, setMenu] = useState<boolean>(false);
   return (
-    <div
+    <Container
       onClick={(e) => {
         e.stopPropagation();
       }}
@@ -38,6 +44,13 @@ export function MapPin(props: MapPinProps) {
             <MenuHeader>
               <Typography use="headline6">{restaurant.name}</Typography>
               <div style={{ flex: 1 }} />
+              <IconButton
+                icon="assistant_direction"
+                onClick={() => {
+                  onDirectionClick(restaurant);
+                  setMenu(false);
+                }}
+              />
               <IconButton icon="close" onClick={() => setMenu(false)} />
             </MenuHeader>
             <hr />
@@ -56,6 +69,6 @@ export function MapPin(props: MapPinProps) {
           }}
         />
       </MenuSurfaceAnchor>
-    </div>
+    </Container>
   );
 }

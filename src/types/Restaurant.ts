@@ -3,4 +3,5 @@ export type Restaurant = {
   name: string;
   address: string;
   specialty?: string;
+  placeId?: string; // place id from google
 };
