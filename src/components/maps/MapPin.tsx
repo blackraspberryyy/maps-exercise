@@ -12,7 +12,7 @@ type MapPinProps = {
 
 const Container = styled.div`
   margin-left: -24px;
-  margin-top: -24px;
+  margin-top: -36px;
 `;
 
 const TextContainer = styled.div`
@@ -54,12 +54,17 @@ export function MapPin(props: MapPinProps) {
               <IconButton icon="close" onClick={() => setMenu(false)} />
             </MenuHeader>
             <hr />
+            {restaurant.specialties && restaurant.specialties.length > 0 && (
+              <Typography use="subtitle2">
+                Specialty: {restaurant.specialties.join(", ")}
+              </Typography>
+            )}
+            <br />
             <Typography use="caption" style={{ paddingTop: 16 }}>
               {restaurant.address}
             </Typography>
           </TextContainer>
         </Menu>
-
         <IconButton
           icon="place"
           style={{ color: "#ea4335" }}

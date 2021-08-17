@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import GoogleMapReact from "google-map-react";
 import styled from "styled-components";
 import { usePosition } from "use-position";
-import { Button } from "rmwc";
+import { Button, CircularProgress, Typography } from "rmwc";
 import { Restaurant } from "../../types";
 import { MapPin } from ".";
+import AddRestaurantDialog from "../AddRestaurantDialog";
 
 const API_KEY = "AIzaSyCrWA0GMWAD5vVLl1z6fmwlNgQoTINGm34";
 
@@ -40,11 +41,21 @@ const SideNav = styled.div`
   flex-direction: column;
 `;
 
+const NotesContainer = styled.div`
+  padding: 16px;
+`;
+
 export function Maps(props: MapsProps) {
   const { className } = props;
 
   const [mapsApi, setMapApi] = useState<GoogleMapsApiType | null>(null);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [plotMode, setPlotMode] = useState<boolean>(false);
+  const [restaurantDialog, setRestaurantDialog] = useState<boolean>(false);
+  const [clickedLocation, setClickedLocation] =
+    useState<GoogleMapReact.ClickEventValue | null>(null);
+  const [isShowRestaurantLoading, setIsShowRestaurantLoading] =
+    useState<boolean>(false);
   const [drawMode, setDrawMode] = useState<boolean>(false);
   const [PlacesService, setPlacesService] = useState<any>();
   const [DirectionsService, setDirectionsService] = useState<any>();
@@ -84,9 +95,17 @@ export function Maps(props: MapsProps) {
     }
   };
 
+  const addRestaurant = (e: GoogleMapReact.ClickEventValue) => {
+    if (plotMode) {
+      setRestaurantDialog(true);
+      setClickedLocation(e);
+    }
+  };
+
   const showRestaurants = async () => {
     if (mapsApi && mapsApi.maps && PlacesService) {
       const { maps } = mapsApi;
+      setIsShowRestaurantLoading(true);
 
       PlacesService.textSearch(
         {
@@ -98,6 +117,7 @@ export function Maps(props: MapsProps) {
           if (status === maps.places.PlacesServiceStatus.OK) {
             response.forEach((res: any) => {
               results.push({
+                ...res,
                 address: res.formatted_address,
                 name: res.name,
                 location: {
@@ -108,13 +128,15 @@ export function Maps(props: MapsProps) {
               });
             });
           }
-          setRestaurants(results);
+          setRestaurants([...restaurants, ...results]);
+          setIsShowRestaurantLoading(false);
         }
       );
     }
   };
 
   const drawPolygon = () => {
+    setPlotMode(false);
     setDrawMode(!drawMode);
   };
 
@@ -143,43 +165,71 @@ export function Maps(props: MapsProps) {
 
       if (drawMode) {
         drawingManager.setMap(map);
+        maps.event.addListener(
+          drawingManager,
+          "overlaycomplete",
+          function (event: any) {
+            const bounds = event.overlay.getBounds();
+
+            const isWithinBounds = (latLng: any) => {
+              switch (event.type) {
+                case "circle": {
+                  const circle = event.overlay;
+                  return (
+                    bounds.contains(latLng) &&
+                    maps.geometry.spherical.computeDistanceBetween(
+                      circle.getCenter(),
+                      latLng
+                    ) <= circle.getRadius()
+                  );
+                }
+
+                case "rectangle": {
+                  const rectangle = event.overlay;
+                  return rectangle.getBounds().contains(latLng);
+                }
+              }
+            };
+
+            const boundedRestaurants = restaurants.filter((res) =>
+              isWithinBounds(
+                new mapsApi.maps.LatLng(res.location.lat, res.location.lng)
+              )
+            );
+
+            PlacesService.textSearch(
+              {
+                type: "restaurant",
+                bounds,
+              },
+              function (response: any, status: any) {
+                let results: any[] = [];
+
+                if (status === maps.places.PlacesServiceStatus.OK) {
+                  response.forEach((res: any) => {
+                    results.push({
+                      ...res,
+                      address: res.formatted_address,
+                      name: res.name,
+                      location: {
+                        lat: res.geometry.location.lat(),
+                        lng: res.geometry.location.lng(),
+                      },
+                      placeId: res.place_id,
+                    });
+                  });
+                }
+                setRestaurants([...boundedRestaurants, ...results]);
+
+                // Remove Shape overlay
+                event.overlay.setMap(null);
+              }
+            );
+          }
+        );
       } else {
         drawingManager.setMap(null);
       }
-
-      maps.event.addListener(
-        drawingManager,
-        "overlaycomplete",
-        function (overlay: any) {
-          const bounds = overlay.overlay.getBounds();
-
-          PlacesService.textSearch(
-            {
-              type: "restaurant",
-              bounds,
-            },
-            function (response: any, status: any) {
-              let results: any[] = [];
-              if (status === maps.places.PlacesServiceStatus.OK) {
-                response.forEach((res: any) => {
-                  results.push({
-                    address: res.formatted_address,
-                    name: res.name,
-                    location: {
-                      lat: res.geometry.location.lat(),
-                      lng: res.geometry.location.lng(),
-                    },
-                  });
-                });
-              }
-              setRestaurants(results);
-
-              // Remove Shape overlay
-              overlay.overlay.setMap(null);
-            }
-          );
-        }
-      );
     }
   }, [
     drawMode,
@@ -188,6 +238,7 @@ export function Maps(props: MapsProps) {
     mapsApi?.maps,
     drawingManager,
     PlacesService,
+    restaurants,
   ]);
 
   return (
@@ -196,12 +247,20 @@ export function Maps(props: MapsProps) {
         <GoogleMapReact
           bootstrapURLKeys={{
             key: API_KEY,
-            libraries: ["places", "drawing"],
+            libraries: ["places", "drawing", "geometry"],
           }}
-          center={CEBU_COORDINATE}
           defaultZoom={14}
+          center={
+            (clickedLocation && {
+              lat: clickedLocation.lat,
+              lng: clickedLocation.lng,
+            }) ||
+            CEBU_COORDINATE
+          }
           onGoogleApiLoaded={(api: GoogleMapsApiType) => apiIsLoaded(api)}
           yesIWantToUseGoogleMapApiInternals
+          onClick={addRestaurant}
+          layerTypes={["TrafficLayer"]}
         >
           {restaurants &&
             restaurants.map((restaurant: any, index: number) => (
@@ -216,7 +275,28 @@ export function Maps(props: MapsProps) {
         </GoogleMapReact>
       </MapContainer>
       <SideNav>
-        <Button unelevated style={{ margin: 8 }} onClick={showRestaurants}>
+        <Button
+          unelevated={!plotMode}
+          style={{ margin: 8 }}
+          onClick={() => {
+            setDrawMode(false);
+            setPlotMode(!plotMode);
+          }}
+        >
+          {plotMode ? "Turn Off " : ""}Plotting Restaruants
+        </Button>
+        {plotMode && (
+          <Typography use="caption" style={{ textAlign: "center" }}>
+            To start plotting a restaurant, click anywhere on the map
+          </Typography>
+        )}
+        <Button
+          unelevated
+          disabled={isShowRestaurantLoading}
+          style={{ margin: 8 }}
+          onClick={showRestaurants}
+          icon={isShowRestaurantLoading && <CircularProgress />}
+        >
           Show Restaurants in Cebu
         </Button>
         <Button
@@ -227,16 +307,41 @@ export function Maps(props: MapsProps) {
           {!drawMode ? "Draw Polygon" : "Toggle off Draw Mode"}
         </Button>
         <div style={{ flex: 1 }}></div>
+        <NotesContainer>
+          <h5>Notes:</h5>
+          <ul>
+            <li>
+              To get directions, click any restaurants, and click the direction
+              icon. <br />
+              You should allow the your browser to access your location first
+              for the Directions to work.
+            </li>
+            <li>
+              There are no configured database for this project so plotted
+              restaurants are not persisted anywhere.
+            </li>
+          </ul>
+        </NotesContainer>
         <Button
-          danger
           style={{ margin: 8 }}
           onClick={() => {
             DirectionsRenderer.setMap(null);
           }}
         >
-          Remove any existing Directions Overlay
+          Clear any existing Directions Overlay
         </Button>
       </SideNav>
+      <AddRestaurantDialog
+        open={restaurantDialog}
+        location={clickedLocation}
+        mapsApi={mapsApi}
+        onRegisterRestaurant={(restaurant: Restaurant) => {
+          setRestaurants([...restaurants, restaurant]);
+        }}
+        onClose={() => {
+          setRestaurantDialog(false);
+        }}
+      />
     </Container>
   );
 }
