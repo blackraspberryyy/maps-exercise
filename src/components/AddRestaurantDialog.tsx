@@ -116,7 +116,13 @@ export default function AddRestaurantDialog(props: AddRestaurantDialogProps) {
             unelevated
             isDefaultAction
             onClick={() => {
-              onRegisterRestaurant({ name, specialties, address, location });
+              onRegisterRestaurant({
+                name,
+                specialties,
+                address,
+                location,
+                visits: 0,
+              });
             }}
           >
             Register

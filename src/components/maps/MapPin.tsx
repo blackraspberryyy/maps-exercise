@@ -55,11 +55,14 @@ export function MapPin(props: MapPinProps) {
             </MenuHeader>
             <hr />
             {restaurant.specialties && restaurant.specialties.length > 0 && (
-              <Typography use="subtitle2">
-                Specialty: {restaurant.specialties.join(", ")}
-              </Typography>
+              <>
+                <Typography use="subtitle2">
+                  Specialty: {restaurant.specialties.join(", ")}
+                </Typography>
+                <br />
+              </>
             )}
-            <br />
+
             <Typography use="caption" style={{ paddingTop: 16 }}>
               {restaurant.address}
             </Typography>

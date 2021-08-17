@@ -50,6 +50,9 @@ export function Maps(props: MapsProps) {
 
   const [mapsApi, setMapApi] = useState<GoogleMapsApiType | null>(null);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [restaurantsOnShape, setRestaurantsOnShape] = useState<Restaurant[]>(
+    []
+  );
   const [plotMode, setPlotMode] = useState<boolean>(false);
   const [restaurantDialog, setRestaurantDialog] = useState<boolean>(false);
   const [clickedLocation, setClickedLocation] =
@@ -136,6 +139,7 @@ export function Maps(props: MapsProps) {
   };
 
   const drawPolygon = () => {
+    setRestaurantsOnShape([]);
     setPlotMode(false);
     setDrawMode(!drawMode);
   };
@@ -197,34 +201,10 @@ export function Maps(props: MapsProps) {
               )
             );
 
-            PlacesService.textSearch(
-              {
-                type: "restaurant",
-                bounds,
-              },
-              function (response: any, status: any) {
-                let results: any[] = [];
+            setRestaurantsOnShape([...boundedRestaurants]);
 
-                if (status === maps.places.PlacesServiceStatus.OK) {
-                  response.forEach((res: any) => {
-                    results.push({
-                      ...res,
-                      address: res.formatted_address,
-                      name: res.name,
-                      location: {
-                        lat: res.geometry.location.lat(),
-                        lng: res.geometry.location.lng(),
-                      },
-                      placeId: res.place_id,
-                    });
-                  });
-                }
-                setRestaurants([...boundedRestaurants, ...results]);
-
-                // Remove Shape overlay
-                event.overlay.setMap(null);
-              }
-            );
+            // Remove Shape overlay
+            event.overlay.setMap(null);
           }
         );
       } else {
@@ -240,6 +220,8 @@ export function Maps(props: MapsProps) {
     PlacesService,
     restaurants,
   ]);
+
+  const pins = drawMode ? restaurantsOnShape : restaurants;
 
   return (
     <Container className={className}>
@@ -262,8 +244,8 @@ export function Maps(props: MapsProps) {
           onClick={addRestaurant}
           layerTypes={["TrafficLayer"]}
         >
-          {restaurants &&
-            restaurants.map((restaurant: any, index: number) => (
+          {pins &&
+            pins.map((restaurant: any, index: number) => (
               <MapPin
                 key={"restaurant-" + index}
                 restaurant={restaurant}
@@ -279,6 +261,7 @@ export function Maps(props: MapsProps) {
           unelevated={!plotMode}
           style={{ margin: 8 }}
           onClick={() => {
+            setRestaurantsOnShape([]);
             setDrawMode(false);
             setPlotMode(!plotMode);
           }}
@@ -291,22 +274,19 @@ export function Maps(props: MapsProps) {
           </Typography>
         )}
         <Button
-          unelevated
-          disabled={isShowRestaurantLoading}
-          style={{ margin: 8 }}
-          onClick={showRestaurants}
-          icon={isShowRestaurantLoading && <CircularProgress />}
-        >
-          Show Restaurants in Cebu
-        </Button>
-        <Button
           unelevated={!drawMode}
           style={{ margin: 8 }}
           onClick={drawPolygon}
         >
-          {!drawMode ? "Draw Polygon" : "Toggle off Draw Mode"}
+          {!drawMode ? "Draw Shape" : "Toggle off Draw Mode"}
         </Button>
+        {drawMode && (
+          <Typography use="caption" style={{ textAlign: "center" }}>
+            Draw a shape on the map to reveal previously created restaurants
+          </Typography>
+        )}
         <div style={{ flex: 1 }}></div>
+
         <NotesContainer>
           <h5>Notes:</h5>
           <ul>
@@ -322,14 +302,27 @@ export function Maps(props: MapsProps) {
             </li>
           </ul>
         </NotesContainer>
-        <Button
-          style={{ margin: 8 }}
-          onClick={() => {
-            DirectionsRenderer.setMap(null);
-          }}
-        >
-          Clear any existing Directions Overlay
-        </Button>
+
+        <div style={{ paddingRight: 8, paddingLeft: 8 }}>
+          <h5>Misc</h5>
+          <Button
+            style={{ width: "100%" }}
+            unelevated
+            disabled={isShowRestaurantLoading}
+            onClick={showRestaurants}
+            icon={isShowRestaurantLoading && <CircularProgress />}
+          >
+            Show Restaurants in Cebu
+          </Button>
+          <Button
+            style={{ width: "100%" }}
+            onClick={() => {
+              DirectionsRenderer.setMap(null);
+            }}
+          >
+            Clear any existing Directions Overlay
+          </Button>
+        </div>
       </SideNav>
       <AddRestaurantDialog
         open={restaurantDialog}
