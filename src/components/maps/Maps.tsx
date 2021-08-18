@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import GoogleMapReact from "google-map-react";
+import { union, capitalize, isEmpty, intersection } from "lodash";
 import styled from "styled-components";
 import { usePosition } from "use-position";
-import { Button, CircularProgress, Typography } from "rmwc";
+import { Button, Checkbox, CircularProgress, Typography } from "rmwc";
 import { Restaurant } from "../../types";
 import { MapPin } from ".";
 import AddRestaurantDialog from "../AddRestaurantDialog";
@@ -45,6 +46,10 @@ const NotesContainer = styled.div`
   padding: 16px;
 `;
 
+const FilterContainer = styled.div`
+  padding: 16px;
+`;
+
 export function Maps(props: MapsProps) {
   const { className } = props;
   const { latitude, longitude } = usePosition(true);
@@ -64,6 +69,10 @@ export function Maps(props: MapsProps) {
   const [DirectionsService, setDirectionsService] = useState<any>();
   const [DirectionsRenderer, setDirectionsRenderer] = useState<any>();
   const [drawingManager, setDrawingManager] = useState<any>();
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [restaurantsByFilter, setRestaurantsByFilter] = useState<Restaurant[]>(
+    []
+  );
 
   const apiIsLoaded = (api: GoogleMapsApiType) => {
     setMapApi(api);
@@ -162,6 +171,33 @@ export function Maps(props: MapsProps) {
     }
   };
 
+  const changeFilters = (filter: string, isChecked: boolean) => {
+    let filters = [];
+    if (isChecked) {
+      filters = union(selectedFilters, [filter]);
+    } else {
+      filters = selectedFilters.filter((f) => f !== filter);
+    }
+    setSelectedFilters(filters);
+  };
+
+  useEffect(() => {
+    if (selectedFilters.length > 0) {
+      const filtered = restaurants.filter((res) => {
+        const specialties = (res.specialties || []).map((e) => e.toLowerCase());
+        const isIntersect = !isEmpty(
+          intersection(specialties, selectedFilters)
+        );
+        return isIntersect;
+      });
+
+      setRestaurantsByFilter(filtered);
+    } else {
+      // show all
+      setRestaurantsByFilter([]);
+    }
+  }, [selectedFilters, restaurants]);
+
   useEffect(() => {
     if (drawingManager && mapsApi && mapsApi.map && mapsApi.maps) {
       const { map, maps } = mapsApi;
@@ -220,7 +256,20 @@ export function Maps(props: MapsProps) {
     restaurants,
   ]);
 
-  const pins = drawMode ? restaurantsOnShape : restaurants;
+  const pins = drawMode
+    ? restaurantsOnShape
+    : selectedFilters.length > 0
+    ? restaurantsByFilter
+    : restaurants;
+
+  const filters = restaurants
+    .map((res) => res.specialties)
+    .filter((specialties) => !!specialties)
+    .reduce((acc, cur) => {
+      const loweredAcc = (acc || []).map((a) => a.toLowerCase());
+      const loweredCur = (cur || []).map((c) => c.toLowerCase());
+      return union(loweredAcc, loweredCur);
+    }, []);
 
   return (
     <Container className={className}>
@@ -288,6 +337,22 @@ export function Maps(props: MapsProps) {
           </Typography>
         )}
         <div style={{ flex: 1 }}></div>
+        {filters && filters.length > 0 && (
+          <FilterContainer>
+            <h5>Filters</h5>
+            {filters.map((filter, i) => (
+              <Checkbox
+                onChange={(e: any) => {
+                  const isChecked = e.target.checked;
+                  changeFilters(filter, isChecked);
+                }}
+                key={`filter-${i}`}
+              >
+                {capitalize(filter)}
+              </Checkbox>
+            ))}
+          </FilterContainer>
+        )}
         <NotesContainer>
           <h5>Notes:</h5>
           <ul>
