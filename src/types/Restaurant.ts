@@ -4,5 +4,5 @@ export type Restaurant = {
   address: string;
   visits?: number;
   specialties?: string[];
-  placeId?: string; // place id from google
+  placeId: string; // place id from google
 };

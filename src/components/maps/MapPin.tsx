@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { IconButton, Menu, MenuSurfaceAnchor, Typography } from "rmwc";
 import styled from "styled-components";
 import { Restaurant } from "../../types";
+import NumberInput from "../NumberInput";
 
 type MapPinProps = {
   restaurant: Restaurant;
   lat: number;
   lng: number;
   onDirectionClick: (restaurant: Restaurant) => void;
+  onVisitChange?: (visits: number, placeId: string) => void;
 };
 
 const Container = styled.div`
@@ -24,12 +26,18 @@ const TextContainer = styled.div`
 
 const MenuHeader = styled.div`
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: stretch;
 `;
 
+const VisitContainer = styled.div`
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+`;
+
 export function MapPin(props: MapPinProps) {
-  const { restaurant, onDirectionClick } = props;
+  const { restaurant, onDirectionClick, onVisitChange } = props;
 
   const [menu, setMenu] = useState<boolean>(false);
   return (
@@ -53,6 +61,19 @@ export function MapPin(props: MapPinProps) {
               />
               <IconButton icon="close" onClick={() => setMenu(false)} />
             </MenuHeader>
+            <VisitContainer>
+              <NumberInput
+                value={restaurant.visits || 0}
+                onValueChange={(visits: number) => {
+                  if (onVisitChange) {
+                    return onVisitChange(visits, restaurant.placeId);
+                  }
+                }}
+              />
+              <Typography use="subtitle2" style={{ marginRight: 8 }}>
+                Visits:{" "}
+              </Typography>
+            </VisitContainer>
             <hr />
             {restaurant.specialties && restaurant.specialties.length > 0 && (
               <>

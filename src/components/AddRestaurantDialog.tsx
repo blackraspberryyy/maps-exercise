@@ -33,6 +33,7 @@ export default function AddRestaurantDialog(props: AddRestaurantDialogProps) {
   const [inputValue, setInputValue] = useState<string>("");
   const [specialties, setSpecialties] = useState<string[]>([]);
   const [address, setAddress] = useState<string>("");
+  const [placeId, setPlaceId] = useState<string>("");
   const { location, mapsApi, onRegisterRestaurant, onClose, ...rest } = props;
 
   useEffect(() => {
@@ -47,6 +48,7 @@ export default function AddRestaurantDialog(props: AddRestaurantDialogProps) {
         });
 
         setAddress(results[0].formatted_address);
+        setPlaceId(results[0].place_id);
       }
     }
 
@@ -122,6 +124,7 @@ export default function AddRestaurantDialog(props: AddRestaurantDialogProps) {
                 address,
                 location,
                 visits: 0,
+                placeId,
               });
             }}
           >

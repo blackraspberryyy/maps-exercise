@@ -47,7 +47,7 @@ const NotesContainer = styled.div`
 
 export function Maps(props: MapsProps) {
   const { className } = props;
-
+  const { latitude, longitude } = usePosition(true);
   const [mapsApi, setMapApi] = useState<GoogleMapsApiType | null>(null);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [restaurantsOnShape, setRestaurantsOnShape] = useState<Restaurant[]>(
@@ -64,7 +64,6 @@ export function Maps(props: MapsProps) {
   const [DirectionsService, setDirectionsService] = useState<any>();
   const [DirectionsRenderer, setDirectionsRenderer] = useState<any>();
   const [drawingManager, setDrawingManager] = useState<any>();
-  const { latitude, longitude } = usePosition(true);
 
   const apiIsLoaded = (api: GoogleMapsApiType) => {
     setMapApi(api);
@@ -243,6 +242,9 @@ export function Maps(props: MapsProps) {
           yesIWantToUseGoogleMapApiInternals
           onClick={addRestaurant}
           layerTypes={["TrafficLayer"]}
+          options={() => ({
+            disableDoubleClickZoom: true,
+          })}
         >
           {pins &&
             pins.map((restaurant: any, index: number) => (
@@ -286,7 +288,6 @@ export function Maps(props: MapsProps) {
           </Typography>
         )}
         <div style={{ flex: 1 }}></div>
-
         <NotesContainer>
           <h5>Notes:</h5>
           <ul>
