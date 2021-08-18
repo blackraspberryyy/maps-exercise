@@ -2,16 +2,6 @@
 
 💻 Demo: https://blackraspberryyy.github.io/maps-exercise/
 
-## Preview
-
-<p align="center">
-  <img src="screenshot-1.jpg" alt="Show all Restaurants in Cebu" width="50%">
-</p>
-
-<p align="center">
-  <img src="screenshot-2.jpg" alt="Draw Polygons" width="50%">
-</p>
-
 ## TODO's
 
 1. ✅ Plot restaurants across Cebu.
